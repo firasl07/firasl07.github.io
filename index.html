@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Misi Pemburu Kesalahan Bahasa</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0720;--panel:#161040;--blue:#3a86ff;--purple:#b05cff;--yellow:#ffd60a;--green:#38ef7d;--red:#ff4d6d;--text:#eae6ff}
+*{box-sizing:border-box;margin:0}
+html,body{min-height:100%}
+body{background:var(--bg);color:var(--text);font-family:'Press Start 2P','Courier New',monospace;font-size:12px;line-height:1.8;
+background-image:linear-gradient(rgba(58,134,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(58,134,255,.07) 1px,transparent 1px);background-size:24px 24px;
+display:flex;justify-content:center;padding:14px}
+#app{width:100%;max-width:780px}
+.screen{display:none;text-align:center;animation:in .3s steps(5)}
+.screen.on{display:block}
+@keyframes in{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
+h1{font-size:clamp(18px,5vw,34px);line-height:1.5;color:var(--yellow);text-shadow:3px 3px 0 var(--purple),6px 6px 0 var(--blue);margin:22px 0 10px}
+h2{font-size:clamp(13px,3.4vw,18px);color:var(--green);margin:18px 0}
+p{margin:10px 0}
+.small{font-size:10px;color:#b9b2ee}
+.btn{font-family:inherit;font-size:clamp(11px,2.6vw,14px);color:#0b0720;background:var(--yellow);border:0;padding:14px 18px;margin:8px 4px;cursor:pointer;
+box-shadow:inset -4px -4px 0 rgba(0,0,0,.25),0 4px 0 #a88a00,0 0 0 3px #0b0720,0 0 0 6px var(--yellow);transition:transform .08s}
+.btn:active{transform:translateY(4px)}
+.btn:focus-visible{outline:3px solid #fff;outline-offset:6px}
+.btn.g{background:var(--green);box-shadow:inset -4px -4px 0 rgba(0,0,0,.25),0 4px 0 #1b8f4d,0 0 0 3px #0b0720,0 0 0 6px var(--green)}
+.btn.b{background:var(--blue);color:#fff;box-shadow:inset -4px -4px 0 rgba(0,0,0,.25),0 4px 0 #1f4fa3,0 0 0 3px #0b0720,0 0 0 6px var(--blue)}
+.btn.p{background:var(--purple);color:#fff;box-shadow:inset -4px -4px 0 rgba(0,0,0,.25),0 4px 0 #6a2fb0,0 0 0 3px #0b0720,0 0 0 6px var(--purple)}
+.btn.r{background:var(--red);color:#fff;box-shadow:inset -4px -4px 0 rgba(0,0,0,.25),0 4px 0 #a02a40,0 0 0 3px #0b0720,0 0 0 6px var(--red)}
+.btn.sm{font-size:10px;padding:9px 11px}
+.modes{display:grid;gap:22px;margin:24px 6px}
+.mode{font-family:inherit;color:var(--text);text-align:left;background:var(--panel);border:4px solid var(--blue);padding:16px;cursor:pointer;box-shadow:6px 6px 0 var(--purple)}
+.mode:hover,.mode:focus-visible{border-color:var(--yellow);outline:none}
+.mode b{display:block;color:var(--yellow);font-size:clamp(12px,3vw,15px);margin-bottom:8px;font-weight:400}
+.mode span{font-size:10px;color:#c9c3f5}
+.hud{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;background:var(--panel);border:4px solid var(--purple);padding:10px 12px;font-size:10px}
+.hud em{font-style:normal;color:var(--yellow)}
+.card{background:var(--panel);border:4px solid var(--blue);box-shadow:6px 6px 0 var(--purple);padding:18px 14px;margin:18px 0}
+.lbl{font-size:10px;color:var(--green)}
+#qtext{font-size:clamp(14px,4vw,24px);line-height:1.6;color:#fff;margin:12px 0;word-break:break-word}
+#qtext .x{color:var(--red);text-decoration:line-through wavy var(--red);text-decoration-thickness:2px}
+.hint{font-size:10px;color:#b9b2ee}
+#mic{width:112px;height:112px;margin:14px auto 6px;background:var(--blue);border:0;cursor:pointer;display:grid;place-items:center;
+box-shadow:inset -6px -6px 0 rgba(0,0,0,.3),0 0 0 4px #0b0720,0 0 0 8px var(--blue)}
+#mic.on{background:var(--red);box-shadow:inset -6px -6px 0 rgba(0,0,0,.3),0 0 0 4px #0b0720,0 0 0 8px var(--red);animation:pulse .7s steps(2) infinite}
+#mic:focus-visible{outline:3px solid #fff;outline-offset:10px}
+@keyframes pulse{50%{transform:scale(1.08)}}
+#heard{min-height:54px;border:3px dashed var(--purple);padding:10px;margin:14px 0 8px;color:var(--yellow);font-size:11px;word-break:break-word}
+#fb{min-height:40px;font-size:clamp(14px,4vw,22px);margin:10px 0}
+#fb.ok{color:var(--green);animation:pop .5s steps(4)}
+#fb.no{color:var(--red);animation:shake .4s steps(6)}
+@keyframes pop{0%{transform:scale(.4)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
+@keyframes shake{25%{transform:translateX(-9px)}75%{transform:translateX(9px)}}
+.flash{animation:fl .5s steps(3)}
+@keyframes fl{0%{box-shadow:0 0 0 100vmax rgba(255,77,109,.35) inset}}
+.typed{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.typed input{font-family:inherit;font-size:11px;padding:10px;background:#0b0720;color:var(--text);border:3px solid var(--blue);min-width:0;flex:1 1 200px;max-width:340px}
+.pf{position:fixed;width:10px;height:10px;pointer-events:none;z-index:9;animation:fly 1s steps(10) forwards}
+@keyframes fly{to{transform:translate(var(--dx),var(--dy));opacity:0}}
+#big{font-size:clamp(28px,8vw,56px);color:var(--yellow);text-shadow:3px 3px 0 var(--purple);margin:16px 0}
+#note{display:none;background:#2a0f2f;border:3px solid var(--red);padding:10px;font-size:10px;margin:12px 0}
+.help{text-align:left;font-size:10px;background:var(--panel);border:3px solid var(--green);padding:12px;margin:16px 0}
+.help li{margin:6px 0 6px 16px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- 1. HALAMAN UTAMA -->
+<section class="screen on" id="s-home">
+  <h1>MISI PEMBURU<br>KESALAHAN<br>BAHASA</h1>
+  <p class="small">Sebut jawapan anda. Buru kesalahan ejaan, kata dan ayat!</p>
+  <button class="btn" id="startBtn">▶ MULA</button>
+  <div class="help">
+    <b style="color:var(--green)">CARA BERMAIN</b>
+    <ol>
+      <li>Klik MULA, pilih satu mod.</li>
+      <li>Klik MULA BERCAKAP dan benarkan akses mikrofon bila diminta Chrome.</li>
+      <li>Sebut jawapan yang betul dengan jelas.</li>
+      <li>Betul +10 mata. Jawapan betul berturut-turut dapat bonus!</li>
+    </ol>
+  </div>
+  <div id="note"></div>
+</section>
+
+<!-- 2. PEMILIHAN MOD -->
+<section class="screen" id="s-modes">
+  <h2>PILIH MOD</h2>
+  <div class="modes">
+    <button class="mode" data-m="ejaan"><b>MOD 1: PEMBURU EJAAN</b><span>Sebut ejaan yang betul bagi perkataan yang salah.</span></button>
+    <button class="mode" data-m="kata"><b>MOD 2: PENGUASAAN KATA</b><span>Betulkan kesalahan penggunaan kata dalam ayat.</span></button>
+    <button class="mode" data-m="ayat"><b>MOD 3: PENYELAMAT AYAT</b><span>Sebut semula ayat yang telah dibetulkan.</span></button>
+  </div>
+  <button class="btn b sm" data-go="home">◀ KEMBALI</button>
+</section>
+
+<!-- 3. HALAMAN PERMAINAN -->
+<section class="screen" id="s-game">
+  <div class="hud">
+    <span>SKOR <em id="hScore">0</em></span>
+    <span>TAHAP <em id="hLvl">1</em></span>
+    <span>SOALAN <em id="hQ">1/6</em></span>
+    <span>RANTAI <em id="hStreak">0</em></span>
+    <button class="btn sm p" id="musicBtn" style="margin:0" aria-label="Muzik">♪ MUZIK: OFF</button>
+  </div>
+  <div class="card">
+    <div class="lbl" id="qinst"></div>
+    <div id="qtext"></div>
+    <div class="hint" id="qhint"></div>
+  </div>
+  <button id="mic" aria-label="Mula bercakap">
+    <svg width="64" height="64" viewBox="0 0 16 16" shape-rendering="crispEdges" fill="#fff"><rect x="6" y="1" width="4" height="1"/><rect x="5" y="2" width="6" height="7"/><rect x="6" y="9" width="4" height="1"/><rect x="3" y="6" width="1" height="4"/><rect x="12" y="6" width="1" height="4"/><rect x="4" y="10" width="8" height="1"/><rect x="7" y="11" width="2" height="2"/><rect x="5" y="13" width="6" height="1"/></svg>
+  </button>
+  <button class="btn g" id="micBtn">🎤 MULA BERCAKAP</button>
+  <div id="heard">Suara anda akan dipaparkan di sini...</div>
+  <div id="fb"></div>
+  <div class="typed" id="typedBox">
+    <input id="typedIn" type="text" placeholder="Atau taip jawapan..." autocomplete="off" aria-label="Taip jawapan">
+    <button class="btn sm b" id="typedBtn" style="margin:0">HANTAR</button>
+  </div>
+  <button class="btn sm r" id="skipBtn">LANGKAU ▶</button>
+  <button class="btn sm b" data-go="modes">MENU MOD</button>
+</section>
+
+<!-- 4. HALAMAN KEPUTUSAN -->
+<section class="screen" id="s-result">
+  <h2>TAMAT PERMAINAN</h2>
+  <div id="big">0</div>
+  <p id="rScore" class="small"></p>
+  <div class="card"><div id="rank" style="color:var(--yellow);font-size:clamp(13px,3.6vw,18px)"></div><p id="rmsg" class="small"></p></div>
+  <button class="btn g" id="againBtn">↻ MAIN SEMULA</button>
+  <button class="btn b" data-go="home">☰ MENU UTAMA</button>
+</section>
+
+</div>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+const TOTAL=6;
+
+// [teks soalan (kata salah dalam *...*), [jawapan diterima], [frasa salah yang tidak dibenarkan], petunjuk]
+const DATA={
+ejaan:{inst:'Sebut EJAAN YANG BETUL bagi perkataan ini:',items:[
+['*Keretapi*',['kereta api'],[],'Dua perkataan berasingan'],
+['*Aturcara*',['atur cara'],[],'Dua perkataan berasingan'],
+['*Diatas*',['di atas'],[],'Kata sendi nama "di" dieja terpisah'],
+['*Walaubagaimanapun*',['walau bagaimanapun'],[],'Tiga perkataan berasingan'],
+['*Samada*',['sama ada'],[],'Dua perkataan berasingan'],
+['*Analisa*',['analisis'],['analisa'],'Berakhir dengan -is'],
+['*Kwaliti*',['kualiti'],['kwaliti'],'Ada huruf u dan a'],
+['*Ekspress*',['ekspres'],['ekspress'],'Hanya satu s di hujung']]},
+kata:{inst:'Betulkan kata yang salah. Sebut AYAT YANG BETUL atau KATA GANTI:',items:[
+['Ali sangat *pandai sekali*.',['ali sangat pandai','sangat pandai'],['pandai sekali'],'Ada kata penguat yang berlebihan'],
+['Dia *memperolehi* hadiah.',['memperoleh','dia memperoleh hadiah'],['memperolehi'],'Tiada akhiran -i'],
+['*Para-para* murid berkumpul di dewan.',['para murid berkumpul di dewan'],['para para'],'"Para" sudah bermaksud jamak'],
+['Dia *merubah* tabiatnya.',['mengubah','dia mengubah tabiatnya'],['merubah'],'Kata dasar: ubah'],
+['Dia mempunyai banyak *buku-buku*.',['dia mempunyai banyak buku','banyak buku'],['buku buku'],'"Banyak" sudah bermaksud jamak'],
+['Dia *sangat amat* gembira.',['sangat gembira','amat gembira','dia sangat gembira','dia amat gembira'],['sangat amat','amat sangat'],'Dua kata penguat bertindih'],
+['Dia *mentaati* peraturan sekolah.',['menaati','dia menaati peraturan sekolah'],['mentaati'],'Huruf t luluh selepas meN-'],
+['Kereta itu *amat laju sekali*.',['kereta itu amat laju','kereta itu laju sekali','amat laju','laju sekali'],['amat laju sekali'],'Pilih satu kata penguat sahaja']]},
+ayat:{inst:'Sebut semula AYAT YANG TELAH DIBETULKAN:',items:[
+['*Mereka-mereka* sedang bermain bola.',['mereka sedang bermain bola'],['mereka mereka'],'Buang pengulangan yang tidak perlu'],
+['Buku itu *dibaca oleh saya*.',['buku itu saya baca'],['dibaca oleh saya'],'Ayat pasif dengan kata ganti nama diri pertama'],
+['Kami berbincang *tentang mengenai* masalah itu.',['kami berbincang tentang masalah itu','kami berbincang mengenai masalah itu','kami membincangkan masalah itu'],['tentang mengenai'],'Dua kata sendi bertindih'],
+['Adik saya yang *paling tertinggi* dalam kelas.',['adik saya yang paling tinggi dalam kelas','adik saya yang tertinggi dalam kelas'],['paling tertinggi'],'Darjah perbandingan berganda'],
+['Disebabkan hujan lebat, *maka* banjir berlaku.',['disebabkan hujan lebat banjir berlaku','hujan lebat menyebabkan banjir'],['maka'],'Buang kata hubung yang berlebihan'],
+['Walaupun dia miskin *tetapi* dia jujur.',['walaupun dia miskin dia jujur','walaupun miskin dia jujur'],['miskin tetapi'],'Walaupun tidak berpasangan dengan tetapi'],
+['Pada hari itu *adalah* hari Selasa.',['hari itu hari selasa'],['adalah hari'],'"Adalah" tidak perlu di sini'],
+['Kami semua *adalah* pelajar sekolah ini.',['kami semua pelajar sekolah ini'],['adalah pelajar'],'Buang "adalah"']]}
+};
+
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let mode,qs,qi,score,streak,best,attempts,busy,listening,rec,gotFinal,errored,correctN,ac,musicOn=false,mi=0,mt;
+
+/* ---------- Skrin ---------- */
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id==='s-'+id));stopMic();window.scrollTo(0,0)}
+document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g){sfx('click');show(g.dataset.go)}});
+
+/* ---------- Bunyi ---------- */
+function ctx(){try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume()}catch(e){}return ac}
+function tone(f,d,t,v,w){const c=ctx();if(!c)return;w=w||0;const o=c.createOscillator(),g=c.createGain(),T=c.currentTime+w;o.type=t||'square';o.frequency.value=f;g.gain.setValueAtTime(v||.05,T);g.gain.exponentialRampToValueAtTime(.0001,T+d);o.connect(g);g.connect(c.destination);o.start(T);o.stop(T+d)}
+function sfx(k){if(k==='ok'){[523,659,784,1047].forEach((f,i)=>tone(f,.14,'square',.06,i*.08))}else if(k==='no'){[220,175,131].forEach((f,i)=>tone(f,.2,'sawtooth',.05,i*.12))}else if(k==='click'){tone(660,.06,'square',.04)}else if(k==='end'){[392,523,659,784,1047].forEach((f,i)=>tone(f,.18,'square',.06,i*.1))}}
+const MEL=[262,330,392,330,294,349,440,349,262,330,392,523,494,392,330,294];
+function setMusic(on){musicOn=on;$('#musicBtn').textContent='♪ MUZIK: '+(on?'ON':'OFF');clearInterval(mt);if(on){ctx();mt=setInterval(()=>{if(!musicOn||listening)return;const n=MEL[mi%16];tone(n,.18,'square',.022);if(mi%4===0)tone(n/2,.45,'triangle',.04);mi++},220)}}
+$('#musicBtn').onclick=()=>setMusic(!musicOn);
+
+/* ---------- Normalisasi & padanan ---------- */
+function norm(s){return String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim()}
+const has=(n,p)=>(' '+n+' ').includes(' '+p+' ');
+function lev(a,b){const m=a.length,n=b.length,d=[];for(let i=0;i<=m;i++){d[i]=[i]}for(let j=1;j<=n;j++)d[0][j]=j;for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[m][n]}
+const sim=(a,b)=>1-lev(a,b)/Math.max(a.length,b.length,1);
+function match(n,a,typed){
+  if(mode==='ejaan'){ // suara tidak membezakan jarak, jadi abaikan ruang; taipan mesti tepat
+    return typed?has(n,a):n.replace(/ /g,'').includes(a.replace(/ /g,''));
+  }
+  return has(n,a)||(a.split(' ').length>=3&&sim(n,a)>=.88);
+}
+function judge(alts,typed){
+  const q=qs[qi];let ok=false,hitBad=false;
+  alts.forEach(t=>{const n=norm(t);if(!n)return;
+    const bad=q[2].some(b=>mode==='ejaan'&&!typed?n.replace(/ /g,'').includes(norm(b).replace(/ /g,'')):has(n,norm(b)));
+    if(bad)hitBad=true;
+    else if(q[1].some(a=>match(n,norm(a),typed)))ok=true});
+  return ok?'ok':(hitBad?'bad':'no');
+}
+
+/* ---------- Permainan ---------- */
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function start(m){mode=m;qs=shuffle(DATA[m].items).slice(0,TOTAL);qi=0;score=0;streak=0;best=0;correctN=0;show('game');loadQ()}
+function hud(){$('#hScore').textContent=score;$('#hLvl').textContent=1+Math.floor(qi/2);$('#hQ').textContent=(qi+1)+'/'+TOTAL;$('#hStreak').textContent=streak}
+function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+function loadQ(){
+  const q=qs[qi];attempts=0;busy=false;hud();
+  $('#qinst').textContent=DATA[mode].inst;
+  $('#qtext').innerHTML=esc(q[0]).replace(/\*(.+?)\*/g,'<span class="x">$1</span>');
+  $('#qhint').textContent='Petunjuk: '+q[3];
+  $('#heard').textContent='Tekan MULA BERCAKAP dan sebut jawapan anda...';
+  $('#fb').textContent='';$('#fb').className='';$('#typedIn').value='';
+}
+function confetti(){const c=['#ffd60a','#38ef7d','#3a86ff','#b05cff'];for(let i=0;i<28;i++){const d=document.createElement('div');d.className='pf';d.style.left='50%';d.style.top='45%';d.style.background=c[i%4];d.style.setProperty('--dx',(Math.random()*500-250)+'px');d.style.setProperty('--dy',(Math.random()*400-250)+'px');document.body.appendChild(d);setTimeout(()=>d.remove(),1000)}}
+function fb(t,c){const f=$('#fb');f.textContent=t;f.className='';void f.offsetWidth;f.className=c}
+function answer(alts,typed){
+  if(busy)return;
+  const r=judge(alts,typed);
+  if(r==='ok'){
+    busy=true;streak++;best=Math.max(best,streak);correctN++;
+    const bonus=streak>=2?Math.min(5*(streak-1),25):0;score+=10+bonus;
+    hud();fb('BETUL! +'+(10+bonus)+(bonus?' (BONUS '+bonus+')':''),'ok');sfx('ok');confetti();stopMic();
+    setTimeout(next,1800);
+  }else{
+    attempts++;streak=0;hud();sfx('no');
+    document.body.classList.add('flash');setTimeout(()=>document.body.classList.remove('flash'),500);
+    if(attempts>=2){busy=true;fb('SALAH! Jawapan: '+qs[qi][1][0],'no');stopMic();setTimeout(next,3200)}
+    else fb(r==='bad'?'CUBA LAGI! Kesalahan masih ada.':'CUBA LAGI!','no');
+  }
+}
+function next(){qi++;qi>=TOTAL?finish():loadQ()}
+function finish(){
+  show('result');sfx('end');
+  const max=TOTAL*10,pct=Math.round(correctN/TOTAL*100);
+  $('#big').textContent=score;
+  $('#rScore').textContent='Betul '+correctN+' / '+TOTAL+' | Rantaian terbaik '+best;
+  let r,m;
+  if(pct>=100){r='PEMBURU LEGENDA';m='Sempurna! Tiada kesalahan bahasa yang terlepas daripada anda.'}
+  else if(pct>=67){r='PEMBURU HEBAT';m='Cemerlang! Sedikit lagi untuk jadi legenda.'}
+  else if(pct>=34){r='PEMBURU MUDA';m='Bagus! Teruskan latihan dan cuba mod lain.'}
+  else{r='PEMBURU BARU';m='Jangan putus asa. Baca petunjuk dan cuba lagi!'}
+  $('#rank').textContent=r;$('#rmsg').textContent=m;
+}
+
+/* ---------- Pengecaman suara ---------- */
+function setMic(on){listening=on;$('#mic').classList.toggle('on',on);$('#micBtn').textContent=on?'■ HENTI MIKROFON':'🎤 MULA BERCAKAP';$('#micBtn').className='btn '+(on?'r':'g')}
+function msg(t){$('#heard').textContent=t}
+function startMic(){
+  if(busy)return;
+  if(!SR){msg('Pelayar ini tidak menyokong pengecaman suara. Sila guna Google Chrome atau taip jawapan.');return}
+  try{
+    rec=new SR();rec.lang='ms-MY';rec.interimResults=true;rec.maxAlternatives=5;rec.continuous=false;
+    gotFinal=false;errored=false;
+    rec.onstart=()=>{setMic(true);msg('Mendengar... sila bercakap sekarang 🎧')};
+    rec.onresult=e=>{
+      const res=e.results[e.results.length-1];
+      msg('Dikesan: "'+res[0].transcript+'"');
+      if(res.isFinal){gotFinal=true;answer([...res].map(a=>a.transcript),false)}
+    };
+    rec.onerror=e=>{errored=true;setMic(false);
+      if(e.error==='not-allowed'||e.error==='service-not-allowed')msg('Mikrofon disekat. Klik ikon mangga/kamera di bar alamat Chrome, pilih "Benarkan" mikrofon, kemudian muat semula halaman.');
+      else if(e.error==='no-speech')msg('Suara tidak dapat dikesan. Dekatkan mikrofon dan cuba lagi.');
+      else if(e.error==='audio-capture')msg('Mikrofon tidak ditemui. Sambungkan mikrofon dan cuba lagi.');
+      else if(e.error==='network')msg('Pengecaman suara memerlukan sambungan internet. Semak rangkaian anda.');
+      else if(e.error!=='aborted')msg('Ralat suara ('+e.error+'). Cuba lagi atau taip jawapan.')};
+    rec.onend=()=>{setMic(false);if(!gotFinal&&!errored&&!busy)msg('Suara tidak dapat dikesan. Tekan MULA BERCAKAP dan cuba lagi.')};
+    rec.start();
+  }catch(err){msg('Gagal memulakan mikrofon. Cuba lagi.')}
+}
+function stopMic(){try{if(rec&&listening){rec.onend=null;rec.stop()}}catch(e){}setMic(false)}
+function toggleMic(){ctx();listening?stopMic():startMic()}
+$('#mic').onclick=toggleMic;$('#micBtn').onclick=toggleMic;
+
+/* ---------- Butang lain ---------- */
+function typedSubmit(){const v=$('#typedIn').value.trim();if(v&&!busy){ctx();answer([v],true)}}
+$('#typedBtn').onclick=typedSubmit;
+$('#typedIn').addEventListener('keydown',e=>{if(e.key==='Enter')typedSubmit()});
+$('#skipBtn').onclick=()=>{if(busy)return;busy=true;streak=0;stopMic();fb('Jawapan: '+qs[qi][1][0],'no');setTimeout(next,2500)};
+$('#startBtn').onclick=()=>{ctx();sfx('click');setMusic(true);show('modes')};
+document.querySelectorAll('.mode').forEach(b=>b.onclick=()=>{sfx('click');start(b.dataset.m)});
+$('#againBtn').onclick=()=>{sfx('click');start(mode)};
+
+if(!SR){const n=$('#note');n.style.display='block';n.textContent='AMARAN: Pelayar anda tidak menyokong pengecaman suara. Sila buka permainan ini dalam Google Chrome. Anda masih boleh menaip jawapan.'}
+})();
+</script>
+</body>
+</html>
